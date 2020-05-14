@@ -1,5 +1,5 @@
 export default {
-  firebaseConf : {
+  firebase : {
     apiKey: "AIzaSyBSS7SJue-DnNL6aB_4Xz9W-M9ZN2Rdsv4",
     authDomain: "brevebreve-ef736.firebaseapp.com",
     databaseURL: "https://brevebreve-ef736.firebaseio.com",

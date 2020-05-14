@@ -1,5 +1,6 @@
-import { StyleSheet } from 'react-native'
+import { StyleSheet, Dimensions } from 'react-native'
 import { ThemeProvider } from 'react-native-elements'
+import Constants from 'expo-constants';
 
 const theme = {
   colors : {
@@ -15,11 +16,24 @@ const theme = {
 const styles = StyleSheet.create({
   container: {
     flex : 1,
-    backgroundColor: '#fff',
+  },
+  keyAvoContainer:{
+    flex : 1,
+    alignItems : 'center'
+  },
+  KeAvContScrollView: {
+    flex:1,
+    width :  Math.round(Dimensions.get('window').width)
   },
   blankTitle: {
     textAlign : 'center',
     flex : 2,
+    justifyContent : 'center',
+    alignItems : 'center'
+  },
+  scrollTitle: {
+    textAlign : 'center',
+    flex : 1,
     justifyContent : 'center',
     alignItems : 'center'
   },
