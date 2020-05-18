@@ -3,32 +3,33 @@ import { AsyncStorage } from 'react-native';
 
 
 export default function useUserStorage(){
-  const [user, setUser] = React.useState(() => {
-    async function getUser(){
-      try {
-        const user = await AsyncStorage.getItem('user')
-        console.log(user, 'ELO');
-        return user != null ? JSON.parse(user) : null;
-      } catch (e){
-        console.log('ERROR :retraving user', e);
-        return null;
-      }
-    }
-    return getUser();
-  })
+  const [user, setUser] = React.useState('in')
 
   React.useEffect(() => {
     async function storeUser(){
       try {
+        let current = await AsyncStorage.getItem('user')
         const userString = JSON.stringify(user)
-        console.log('saving user', user);
-        await AsyncStorage.setItem('user', userString)
+        if(current == userString) return;
+         await AsyncStorage.setItem('user', userString)
       } catch (e){
         console.log('ERROR :saving user', e);
       }
     }
-    storeUser();
-  }, [user, setUser]);
+    async function getUser(){
+      try {
+        const val = await AsyncStorage.getItem('user')
+        setUser(val!=null ? JSON.parse(val) : null);
+      } catch (e){
+        console.log('ERROR :retraving user', e);
+        setUser(null);
+      }
+    }
+    if(user == 'in') getUser();
+    if(user && user!= 'in') storeUser();
+
+  }, [user]);
+
 
   return [user, setUser];
 }

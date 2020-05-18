@@ -1,13 +1,14 @@
 import React from 'react'
-import {View, Text } from 'react-native'
+import {View, } from 'react-native'
+import { Input, Text , Button} from 'react-native-elements'
+
 import {styles} from "./styles"
 
-export default class LoadingScreen extends React.Component {
-  render(){
-    return (
-      <View style={styles.container}>
-        <Text>popeta ...</Text>
-      </View>
-    )
-  }
+export default function LoadingScreen(props) {
+
+  return (
+    <View style={styles.blankTitle}>
+      <Text h4>Loading....</Text>
+    </View>
+  )
 }

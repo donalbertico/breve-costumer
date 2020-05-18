@@ -2,31 +2,56 @@ import * as React from 'react';
 import { StyleSheet, Text, View } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
+import firebase from 'firebase'
 
 import { ThemeProvider } from 'react-native-elements'
 import {theme} from './screens/styles'
 
 import useCachedResources from './hooks/useCachedResources'
+import useUserStorage from './hooks/useUserStorage'
 import LoadingScreen from './screens/LoadingScreen.js'
+import HomeScreen from './screens/HomeScreen.js'
 import LoginScreen from './screens/auth/LoginScreen.js'
 import RegisterScreen from './screens/auth/RegisterScreen.js'
 
 
 const Stack = createStackNavigator()
 
+
+
+
 export default function App(props) {
-  const isLoadingComplete = useCachedResources();
+  const [isLoadingComplete,auth,setAuth] = useCachedResources();
+  const [user, setUser] = useUserStorage();
+  const navigationRef = React.createRef();
+
+
+  userChanged = (authUser) =>{
+    setUser(authUser)
+    setAuth(true)
+  }
+
 
   if(!isLoadingComplete){
     return null;
   } else {
     return (
       <ThemeProvider theme={theme}>
-        <NavigationContainer >
+        <NavigationContainer ref={navigationRef}>
           <Stack.Navigator initialRouteName="login" headerMode="None">
-            <Stack.Screen name="loading" component={LoadingScreen}/>
-            <Stack.Screen name="login" component={LoginScreen}/>
-            <Stack.Screen name="register" component={RegisterScreen}/>
+            {auth? (
+              <>
+                <Stack.Screen name="home" component={HomeScreen}/>
+              </>
+            ) : (
+              <>
+                <Stack.Screen name="login" component={LoginScreen}/>
+                <Stack.Screen name="register" >
+                  {props => <RegisterScreen {...props} onUserChanged={this.userChanged.bind(this)}/>}
+                </Stack.Screen>
+              </>
+            )}
+            <Stack.Screen  name="loading" component={LoadingScreen}/>
           </Stack.Navigator>
         </NavigationContainer>
       </ThemeProvider>
