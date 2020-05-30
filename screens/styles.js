@@ -47,9 +47,6 @@ const styles = StyleSheet.create({
   horizontalFlex:{
     flexDirection:'row'
   },
-  horizontalFlexReverse:{
-    flexDirection:'row'
-  },
   longMainButton:{
     marginHorizontal : 10,
     marginBottom : 10
@@ -60,8 +57,24 @@ const styles = StyleSheet.create({
   errorMessage:{
     color : theme.colors.error
   },
+  secondaryText:{
+    color : theme.colors.grey0
+  },
   centerJustified:{
     alignItems : 'center'
+  },
+  screenHeader:{
+    flex : 1,
+    flexDirection:'row',
+    alignItems : 'center',
+    marginRight : 5
+  },
+  screenBody :{
+    flex :8,
+    marginTop :10
+  },
+  marginedText :{
+    margin : 5
   }
 });
 

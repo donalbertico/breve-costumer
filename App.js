@@ -10,7 +10,8 @@ import {theme} from './screens/styles'
 import useCachedResources from './hooks/useCachedResources'
 import useUserStorage from './hooks/useUserStorage'
 import LoadingScreen from './screens/LoadingScreen.js'
-import HomeScreen from './screens/HomeScreen.js'
+import HomeScreen from './screens/home/HomeScreen.js'
+import NewOrderScreen from './screens/home/NewOrderScreen.js'
 import LoginScreen from './screens/auth/LoginScreen.js'
 import RegisterScreen from './screens/auth/RegisterScreen.js'
 
@@ -26,7 +27,7 @@ export default function App(props) {
   const navigationRef = React.createRef();
 
 
-  userChanged = (authUser) =>{
+  _userChanged = (authUser) =>{
     setUser(authUser)
     setAuth(true)
   }
@@ -37,17 +38,18 @@ export default function App(props) {
   } else {
     return (
       <ThemeProvider theme={theme}>
-        <NavigationContainer ref={navigationRef}>
+        <NavigationContainer>
           <Stack.Navigator initialRouteName="login" headerMode="None">
             {auth? (
               <>
                 <Stack.Screen name="home" component={HomeScreen}/>
+                <Stack.Screen name="newOrder" component={NewOrderScreen}/>
               </>
             ) : (
               <>
                 <Stack.Screen name="login" component={LoginScreen}/>
                 <Stack.Screen name="register" >
-                  {props => <RegisterScreen {...props} onUserChanged={this.userChanged.bind(this)}/>}
+                  {props => <RegisterScreen {...props} onUserChanged={this._userChanged.bind(this)}/>}
                 </Stack.Screen>
               </>
             )}

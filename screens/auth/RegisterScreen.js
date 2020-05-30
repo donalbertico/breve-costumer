@@ -34,10 +34,6 @@ export default function RegisterScreen(props) {
 
   const [keyboardAvoiding,setkeyboardAvoiding] = React.useState(false)
 
-  React.useEffect(()=>{
-    console.log('el user',user);
-  },[user])
-
   _nameInputChanged = (value) => {
     setMsg('')
     const expression = 'required|alpha_space|max:90';
@@ -134,7 +130,7 @@ export default function RegisterScreen(props) {
              <Input  placeholder='Repetir Contraseña' value={repeat} onChangeText={checkPasswordsMatch} secureTextEntry={true} errorMessage={repeatVal}  onFocus={enableKeyboardAvoiding}/>
 
              <Button  style={styles.longMainButton} title='crear cuenta' onPress = {handleRegister}/>
-             <View style={styles.horizontalFlexReverse}>
+             <View style={styles.horizontalFlex}>
                <View style= {{flex : 1}}></View>
                <Text h5 style={styles.nextToButton}> ya tengo una cuenta </Text>
                <Button type="clear" title='log in' onPress = {() => props.navigation.navigate('login')}/>

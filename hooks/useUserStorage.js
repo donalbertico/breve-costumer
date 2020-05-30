@@ -11,7 +11,7 @@ export default function useUserStorage(){
         let current = await AsyncStorage.getItem('user')
         const userString = JSON.stringify(user)
         if(current == userString) return;
-         await AsyncStorage.setItem('user', userString)
+        await AsyncStorage.setItem('user', userString)
       } catch (e){
         console.log('ERROR :saving user', e);
       }
@@ -25,11 +25,10 @@ export default function useUserStorage(){
         setUser(null);
       }
     }
+    
     if(user == 'in') getUser();
     if(user && user!= 'in') storeUser();
-
   }, [user]);
-
 
   return [user, setUser];
 }
