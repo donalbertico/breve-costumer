@@ -4,7 +4,7 @@ import {ListItem , Text} from 'react-native-elements'
 import * as firebase from 'firebase'
 import 'firebase/firestore'
 
-export default function Deliverer(props) {
+export default function DelivererChoice(props) {
   const db = firebase.firestore();
 
 

@@ -27,6 +27,14 @@ function DelivererChoiceScreen(props){
   )
 }
 
+function PaymentScreen(props){
+  return (
+    <SafeAreaView style={styles.container}>
+      <Text h3>Donde es que bas a pagar</Text>
+    </SafeAreaView>
+  )
+}
+
 function OrderTypeScreen(props){
   const db = firebase.firestore()
 
@@ -50,10 +58,13 @@ function OrderTypeScreen(props){
       deliverer : props.route.params,
       points : {}
     }
-    setOrder(newOrder);
     props.navigation.navigate('loading');
     db.collection('orders').add(Object.assign({},newOrder,{deliverer : props.route.params.id}))
-      .then(()=>props.navigation.navigate('newOrder',{screen:'points'}))
+      .then((doc)=> {
+        newOrder.id = doc.id;
+        setOrder(newOrder)
+        props.navigation.navigate('newOrder',{screen:'points'})
+      })
       .catch(error => {
         console.log('ERROR',error);
         props.navigation.goBack()
@@ -118,6 +129,7 @@ export default function NewOrderScreen(props) {
       <Tab.Screen name='deliverChoice' component={DelivererChoiceScreen} options={screenOpt}/>
       <Tab.Screen name='orderType' component={OrderTypeScreen} options={screenOpt}/>
       <Tab.Screen name='points' component={PointScreen} options={screenOpt}/>
+      <Tab.Screen name='payment' component={PaymentScreen} options={screenOpt}/>
     </Tab.Navigator>
   )
 }
