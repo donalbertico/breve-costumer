@@ -2,31 +2,33 @@ import * as React from 'react';
 import { AsyncStorage } from 'react-native';
 
 
-export default function usePointStorage(){
-  const [points, setPoints] = React.useState('in')
+export default function usePointStorage(val){
+  const [points, setPoints] = React.useState(val)
 
   React.useEffect(() => {
-    async function storeOrder(){
+    async function storePoints(){
       try{
         let current = await AsyncStorage.getItem('points')
         const pointsString = JSON.stringify(points)
-        if (current == pointString) return;
-        await AsyncStorage.setItem('points',pointString)
+        if (current == pointsString) return;
+        await AsyncStorage.setItem('points',pointsString)
       } catch (e){
         console.log('ERROR : saving points',e);
       }
     }
-    async function getOrder(){
+    async function getPoints(){
       try{
         const val = await AsyncStorage.getItem('points')
-        setPoints(val!=null ? JSON.parse(val) : null);
+        if (val != null) setPoints(JSON.parse(val));
       }catch (e){
         console.log('ERROR : retraving points',e);
       }
     }
-
-    if(points == 'in') getOrder();
-    if(points && points != 'in') storeOrder();
+    if(Object.keys(points).length == 0){
+      getPoints();
+    } else {
+      storePoints();
+    }
   }, [points]);
 
 

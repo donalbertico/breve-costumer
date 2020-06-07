@@ -3,8 +3,7 @@ import {SafeAreaView, ScrollView, View, Picker} from 'react-native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import {Text, Button, Icon, Divider, Avatar, ButtonGroup} from 'react-native-elements'
 import { Dropdown } from 'react-native-material-dropdown'
-import * as firebase from 'firebase'
-import 'firebase/firestore'
+
 
 import {styles, theme} from "../styles"
 
@@ -13,6 +12,7 @@ import useOrderStorage from "../../hooks/useOrderStorage"
 import DelivererChoice from "./components/DelivererChoice"
 
 import PointScreen from "./PointScreen.js"
+import PaymentScreen from "./PaymentScreen.js"
 
 const Tab = createBottomTabNavigator();
 
@@ -27,22 +27,14 @@ function DelivererChoiceScreen(props){
   )
 }
 
-function PaymentScreen(props){
-  return (
-    <SafeAreaView style={styles.container}>
-      <Text h3>Donde es que bas a pagar</Text>
-    </SafeAreaView>
-  )
-}
+
 
 function OrderTypeScreen(props){
-  const db = firebase.firestore()
 
   const [orderType,setOrderType] = React.useState(0)
   const orderTypeOpts = ['Express', 'Punto Extra', 'Linea']
   const [wareType,setWareType] = React.useState('dc')
-  const [user] = useUserStorage()
-  const [order,setOrder] = useOrderStorage()
+  const [user] = useUserStorage({})
 
   const orderDef = {
       0 :'Express es a toda madre como llevar una carta de punto A hacia punto B',
@@ -56,19 +48,9 @@ function OrderTypeScreen(props){
       wareType : wareType,
       user : user.uid,
       deliverer : props.route.params,
-      points : {}
+      status : 'oc'
     }
-    props.navigation.navigate('loading');
-    db.collection('orders').add(Object.assign({},newOrder,{deliverer : props.route.params.id}))
-      .then((doc)=> {
-        newOrder.id = doc.id;
-        setOrder(newOrder)
-        props.navigation.navigate('newOrder',{screen:'points'})
-      })
-      .catch(error => {
-        console.log('ERROR',error);
-        props.navigation.goBack()
-      })
+    props.navigation.navigate('newOrder',{screen:'points', params : {order : newOrder}})
   }
 
   return (
@@ -104,7 +86,7 @@ function OrderTypeScreen(props){
           <Text style={styles.marginedText}>{'Tipo de encomienda:'}</Text>
           <Picker
             selectedValue={wareType}
-            style={{height : 20, marginTop : -50}}
+            style={{height : Platform.OS=='ios' ? 20 : 0, marginTop : Platform.OS=='ios' ? -50 : 0}}
             itemStyle={{fontSize : 18}}
             onValueChange={(val) => setWareType(val)}>
             <Picker.Item label="documentos" value="dc"/>

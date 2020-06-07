@@ -7,27 +7,44 @@ import 'firebase/firestore'
 import { AsyncStorage } from 'react-native';
 
 import useUserStorage from './useUserStorage'
+import useOrderStorage from './useOrderStorage'
 import ApiKeys from '../constants/ApiKeys.js'
 
 export default function useCachedResources() {
   const [isLoadingComplete, setLoadingComplete] = React.useState(false);
   const [auth, setAuth] = React.useState(false)
-  const [uid, setUid] = React.useState(false)
-  const [user,setUser] = useUserStorage();
+  const [user,setUser] = useUserStorage({});
+  const [authUid,setAuthUid] = React.useState(false)
 
 
+  React.useEffect(()=>{
+    if(user.uid){
+      if(authUid && user.uid&& (authUid!= user.uid)){
+        const db = firebase.firestore();
+        const ref = db.collection('users').doc(authUid);
+        ref.get()
+          .then((doc) => {
+            if (doc.exists) {
+              const data = doc.data();
+              data.uid = authUid;
+              setUser(data);
+            }
+          })
+      }
+    }
+  },[user,authUid])
   // Load any resources or data that we need prior to rendering the app
   React.useEffect(() => {
     async function removeItemValue() {
         try {
-            await AsyncStorage.removeItem('user');
+            await AsyncStorage.removeItem('order');
             return true;
         }
         catch(exception) {
             return false;
         }
     }
-
+    removeItemValue();
 
     async function loadResourcesAndDataAsync() {
       try {
@@ -42,22 +59,14 @@ export default function useCachedResources() {
         firebase.initializeApp(ApiKeys.firebase);
         firebase.auth().onAuthStateChanged((authUser) => {
           if (authUser) {
-            const db = firebase.firestore();
-            const ref = db.collection('users').doc(authUser.uid);
-            ref.get()
-              .then((doc) => {
-                if (doc.exists) {
-                  const data = doc.data();
-                  data.uid = uid;
-                  setUser(data);
-                  setAuth(true)
-                  setLoadingComplete(true);
-                  SplashScreen.hideAsync();
-                }
-              })
+            setAuthUid(authUser.uid)
+            setAuth(true)
+            setLoadingComplete(true);
+            SplashScreen.hideAsync();
           } else {
             setAuth(false)
             setLoadingComplete(true);
+            removeItemValue()
             SplashScreen.hideAsync();
           }
         });

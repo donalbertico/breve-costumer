@@ -2,8 +2,9 @@ import * as React from 'react';
 import { AsyncStorage } from 'react-native';
 
 
-export default function useOrderStorage(){
-  const [order, setOrder] = React.useState('in')
+export default function useOrderStorage(val){
+  const [order, setOrder] = React.useState(val)
+  const [loadingOrder,setLoading] = React.useState(true)
 
   React.useEffect(() => {
     async function storeOrder(){
@@ -19,16 +20,19 @@ export default function useOrderStorage(){
     async function getOrder(){
       try{
         const val = await AsyncStorage.getItem('order')
-        setOrder(val!=null ? JSON.parse(val) : null);
+        if(val != null) setOrder(JSON.parse(val));
+        setLoading(false)
       }catch (e){
         console.log('ERROR : retraving order',e);
       }
     }
-
-    if(order == 'in') getOrder();
-    if(order && order != 'in') storeOrder();
+    if(Object.keys(order).length == 0){
+      getOrder();
+    } else {
+      storeOrder();
+    }
   }, [order]);
 
 
-  return [order, setOrder];
+  return [order, setOrder, loadingOrder];
 }

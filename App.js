@@ -23,7 +23,7 @@ const Stack = createStackNavigator()
 
 export default function App(props) {
   const [isLoadingComplete,auth,setAuth] = useCachedResources();
-  const [user, setUser] = useUserStorage();
+  const [user, setUser] = useUserStorage({});
   const navigationRef = React.createRef();
 
 

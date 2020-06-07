@@ -2,8 +2,8 @@ import * as React from 'react';
 import { AsyncStorage } from 'react-native';
 
 
-export default function useUserStorage(){
-  const [user, setUser] = React.useState('in')
+export default function useUserStorage(val){
+  const [user, setUser] = React.useState(val)
 
   React.useEffect(() => {
     async function storeUser(){
@@ -19,16 +19,18 @@ export default function useUserStorage(){
     async function getUser(){
       try {
         const val = await AsyncStorage.getItem('user')
-        setUser(val!=null ? JSON.parse(val) : null);
+        if(val != null) setUser(JSON.parse(val));
       } catch (e){
         console.log('ERROR :retraving user', e);
         setUser(null);
       }
     }
-    
-    if(user == 'in') getUser();
-    if(user && user!= 'in') storeUser();
+    if(Object.keys(user).length == 0){
+      getUser();
+    } else {
+      storeUser();
+    }
   }, [user]);
 
-  return [user, setUser];
+  return [user,setUser];
 }
