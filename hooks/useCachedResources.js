@@ -16,36 +16,40 @@ export default function useCachedResources() {
   const [user,setUser] = useUserStorage({});
   const [authUid,setAuthUid] = React.useState(false)
 
+  const getUser = () => {
+    const db = firebase.firestore();
+    const ref = db.collection('users').doc(authUid);
+    ref.get()
+      .then((doc) => {
+        if (doc.exists) {
+          const data = doc.data();
+          data.uid = authUid;
+          setUser(data);
+        }
+      })
+  }
 
   React.useEffect(()=>{
-    if(user.uid){
-      if(authUid && user.uid&& (authUid!= user.uid)){
-        const db = firebase.firestore();
-        const ref = db.collection('users').doc(authUid);
-        ref.get()
-          .then((doc) => {
-            if (doc.exists) {
-              const data = doc.data();
-              data.uid = authUid;
-              setUser(data);
-            }
-          })
-      }
+    if(authUid && !user.uid){
+      getUser()
+    }else if(authUid && (user.uid != authUid)){
+      getUser()
     }
+
   },[user,authUid])
   // Load any resources or data that we need prior to rendering the app
   React.useEffect(() => {
     async function removeItemValue() {
         try {
             await AsyncStorage.removeItem('order');
+            await AsyncStorage.removeItem('points');
             return true;
         }
         catch(exception) {
             return false;
         }
     }
-    removeItemValue();
-
+    removeItemValue()
     async function loadResourcesAndDataAsync() {
       try {
         SplashScreen.preventAutoHideAsync();

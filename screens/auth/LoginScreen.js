@@ -2,7 +2,7 @@ import * as React from 'react'
 import {View , TouchableOpacity} from 'react-native'
 import firebase from 'firebase'
 
-import {styles} from "../styles"
+import {styles,theme} from "../styles"
 import { Input, Text , Button} from 'react-native-elements'
 
 
@@ -34,11 +34,14 @@ export default function LoginScreen(props) {
       <View style={styles.centeredBox}>
         <Input placeholder='Email' value={email} onChangeText={email => setEmail(email)}/>
         <Input  placeholder='Password' value={password} onChangeText={password => setPass(password)} secureTextEntry={true}/>
-        <Button  style={styles.longMainButton} title='Ingresar'onPress = {this.handleLogin}/>
-        <View style={styles.horizontalFlexReverse}>
+        <Button
+          icon={{ name: "arrowright", type: "antdesign",color:theme.colors.secondary}} iconRight
+          title="Ingresar" type="clear" onPress={handleLogin} />
+        <View style={{marginTop : 30}}></View>
+        <View style={styles.horizontalFlex}>
           <View style= {{flex : 1}}></View>
-          <Text h5 style={styles.nextToButton}> si no tienes una cuenta </Text>
-          <Button type="clear" title='registrate aqui' onPress = {() => props.navigation.navigate('register')}/>
+          <Text > si no tienes una cuenta </Text>
+          <TouchableOpacity  onPress = {() => props.navigation.navigate('register')}><Text style={{color : theme.colors.primary, marginRight : 10}}>registrate aqui</Text></TouchableOpacity>
         </View>
       </View>
     </View>

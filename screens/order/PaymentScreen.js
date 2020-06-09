@@ -22,7 +22,7 @@ export default function PaymentScreen(props){
   }
 
   const [order,setOrder] = useOrderStorage(props.route.params.order)
-  const [points] = usePointStorage({})
+  const [points] = usePointStorage(props.route.params.points)
   const [avaliblePoints,setAvaliblePoints] = React.useState([])
 
   const [payingAt,setPayingAt] = React.useState(order.payingAt ? order.payingAt : '0');
@@ -41,12 +41,13 @@ export default function PaymentScreen(props){
 
 
   createOrder = ()=>{
-    let newOrder = order;
+    let newOrder = Object.assign({},order);
     newOrder.detail = detail;
     newOrder.payingAt = payingAt;
+    newOrder.status = 'cr';
     newOrder.deliverer = order.deliverer.id
 
-    Object.assign({},order,{detail : detail})
+    props.navigation.navigate('loading')
     let orderRef = db.collection('orders')
     orderRef.add(newOrder)
       .then((doc) => {
@@ -56,8 +57,9 @@ export default function PaymentScreen(props){
           const ref = orderRef.doc(doc.id).collection('points').doc();
           batch.set(ref,points[point]);
         });
+        console.log(order);
         batch.commit()
-          .then(console.log('yasta'))
+          .then(props.navigation.navigate('home',{order : Object.assign({},order,{detail : detail, payingAt:payingAt,status : 'cr'})}))
           .catch((e) => {console.log(e,'Error saving batch')})
       })
       .catch((e) => console.log(e,'ERROR saving order'))

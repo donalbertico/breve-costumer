@@ -4,6 +4,7 @@ import { AsyncStorage } from 'react-native';
 
 export default function usePointStorage(val){
   const [points, setPoints] = React.useState(val)
+  const [loadingPoints,setLoading] = React.useState(true)
 
   React.useEffect(() => {
     async function storePoints(){
@@ -20,6 +21,7 @@ export default function usePointStorage(val){
       try{
         const val = await AsyncStorage.getItem('points')
         if (val != null) setPoints(JSON.parse(val));
+        setLoading(false)
       }catch (e){
         console.log('ERROR : retraving points',e);
       }
@@ -32,5 +34,5 @@ export default function usePointStorage(val){
   }, [points]);
 
 
-  return [points, setPoints];
+  return [points, setPoints, loadingPoints];
 }

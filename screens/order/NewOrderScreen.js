@@ -9,7 +9,7 @@ import {styles, theme} from "../styles"
 
 import useUserStorage from "../../hooks/useUserStorage"
 import useOrderStorage from "../../hooks/useOrderStorage"
-import DelivererChoice from "./components/DelivererChoice"
+import DelivererChoice from "../home/components/DelivererChoice"
 
 import PointScreen from "./PointScreen.js"
 import PaymentScreen from "./PaymentScreen.js"
@@ -50,7 +50,8 @@ function OrderTypeScreen(props){
       deliverer : props.route.params,
       status : 'oc'
     }
-    props.navigation.navigate('newOrder',{screen:'points', params : {order : newOrder}})
+    console.log(newOrder);
+    props.navigation.navigate('newOrder',{screen:'points', params : {order : newOrder, points : {}}})
   }
 
   return (

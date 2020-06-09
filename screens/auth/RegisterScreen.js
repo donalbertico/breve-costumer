@@ -1,12 +1,12 @@
 import * as React from 'react';
-import {View, KeyboardAvoidingView, Platform, Keyboard, ScrollView, SafeAreaView} from 'react-native'
+import {View, KeyboardAvoidingView, Platform, Keyboard, ScrollView, SafeAreaView,TouchableOpacity} from 'react-native'
 import * as firebase from 'firebase'
 import 'firebase/firestore'
 import SimpleReactValidator from 'simple-react-validator'
 
 import useUserStorage from '../../hooks/useUserStorage'
 
-import {styles} from "../styles"
+import {styles,theme} from "../styles"
 import { Input, Text , Button} from 'react-native-elements'
 
 const validator = new SimpleReactValidator();
@@ -15,7 +15,7 @@ export default function RegisterScreen(props) {
 
   const db = firebase.firestore();
 
-  const [user,setUser] = useUserStorage();
+  const [user,setUser] = useUserStorage({});
 
   const [name,setName] = React.useState('')
   const [email,setEmail] = React.useState('')
@@ -128,12 +128,14 @@ export default function RegisterScreen(props) {
              <Input placeholder='Telefono' keyboardType='numeric' value={phone} onChangeText={_phoneInputChanged} errorMessage={phoneVal} onFocus={enableKeyboardAvoiding}/>
              <Input placeholder='Contraseña' value={password} onChangeText={_passwordInputChanged} secureTextEntry={true} errorMessage={passVal}  onFocus={enableKeyboardAvoiding} onEndEditing={(e)=>{_passwordInputChanged(e.nativeEvent.text)}}/>
              <Input  placeholder='Repetir Contraseña' value={repeat} onChangeText={checkPasswordsMatch} secureTextEntry={true} errorMessage={repeatVal}  onFocus={enableKeyboardAvoiding}/>
-
-             <Button  style={styles.longMainButton} title='crear cuenta' onPress = {handleRegister}/>
+             <Button
+               icon={{ name: "arrowright", type: "antdesign",color:theme.colors.secondary}} iconRight
+               title="Crear Cuenta" type="clear" onPress={handleRegister} />
+             <View style={{flex:1}}></View>
              <View style={styles.horizontalFlex}>
                <View style= {{flex : 1}}></View>
-               <Text h5 style={styles.nextToButton}> ya tengo una cuenta </Text>
-               <Button type="clear" title='log in' onPress = {() => props.navigation.navigate('login')}/>
+               <Text h5> ya tengo una cuenta </Text>
+               <TouchableOpacity  onPress = {() => props.navigation.navigate('login')}><Text style={{color : theme.colors.primary, marginRight : 10}}>registrate aqui</Text></TouchableOpacity>
              </View>
 
            </View>

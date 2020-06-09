@@ -10,37 +10,56 @@ import useUserStorage from "../../hooks/useUserStorage"
 import useOrderStorage from "../../hooks/useOrderStorage"
 import usePointStorage from "../../hooks/usePointStorage"
 import DelivererChoice from "./components/DelivererChoice"
+import OrderSumup from "./components/OrderSumup"
 
 export default function HomeScreen(props) {
   const db = firebase.firestore()
 
   const [onProcess,setOnProcess] = React.useState(false)
+  const updatedOrder = props.route.params ? (props.route.params.order? props.route.params.order : false ):false;
   const [order,setOrder,loadingOrder] = useOrderStorage({})
-  const [points,setPoints] = usePointStorage({})
-  const [pointsSize,setPointsSize] = React.useState(0)
+  const [loading,setLoading] = React.useState(true)
+  const [points,setPoints,loadingPoints] = usePointStorage({})
+  const [pointsIndex,setPointsIndex] = React.useState(0)
 
   React.useEffect(() => {
-    if((!loadingOrder) &&Object.keys(order).length != 0){
-      setPointsSize(Object.keys(points).length)
+    if((!loadingOrder) && (!loadingPoints)){
+      setLoading(false)
+    }else return;
+    if(Object.keys(order).length != 0){
+      setPointsIndex((Object.keys(points).length)-1)
       setOnProcess(true)
     }
-  }, [order,loadingOrder])
+  }, [order,loadingOrder,loadingPoints])
+
+  React.useEffect(() => {
+    if(updatedOrder){
+      setOnProcess(true)
+      if(order.status != updatedOrder.status){
+        setOrder(updatedOrder)
+      }
+    }
+  },[updatedOrder])
 
   _delivererSelected = (deliverer) => {
-    props.navigation.navigate('newOrder',{screen : 'orderType', params : deliverer})
+    props.navigation.navigate('newOrder',{screen : 'orderType', params : deliverer, points : {}})
   }
 
   completeOrder = () => {
     switch (order.type) {
       case 0:
-        if(pointsSize == 1) return props.navigation.navigate('payment',{screen : 'payment',params : {order : order}});
-        props.navigation.navigate('newOrder',{screen : 'payment',params : { order : order, point : pointsSize}});
+        if(pointsIndex == 1) return props.navigation.navigate('newOrder',{screen : 'payment',params : {order : order, points : points}});
+        props.navigation.navigate('newOrder',{screen : 'points',params : { order : order, point : pointsIndex+1, points : points}});
+      break;
+      case 1:
+        if(pointsIndex == 2) return props.navigation.navigate('newOrder',{screen : 'payment',params : {order : order, points : points}});
+        props.navigation.navigate('newOrder',{screen : 'points',params : { order : order, point : pointsIndex+1, points : points}});
       break;
       default:
     }
   }
 
-  OrderSumUp = () => {
+  OrderInprocess = () => {
     return (
       <View>
         <Text h3> Tienes una order creando wey {order.deliverer.name}</Text>
@@ -60,8 +79,15 @@ export default function HomeScreen(props) {
   OrderStatuSwitch = ({status}) => {
     switch (status) {
       case 'oc':
-        return (<OrderSumUp></OrderSumUp>)
+        return (<OrderInprocess></OrderInprocess>)
         break;
+      case 'cr':
+        return (
+          <View>
+            <Text>la order esta siendo revisada por la mensajeria, te notificaremos tan pronto sea aceptada</Text>
+            <OrderSumup order={order}></OrderSumup>
+          </View>
+        )
       default:
     }
   }
@@ -83,14 +109,11 @@ export default function HomeScreen(props) {
       <View style={styles.screenBody}>
         <ScrollView>
           {onProcess?(
-            <>
               <OrderStatuSwitch status={order.status}></OrderStatuSwitch>
-            </>
-          ):(
-            <>
+        ):( loading ? (<Text>Espede</Text>) :
+          (
               <DelivererChoice onDelivererSelected={this._delivererSelected.bind(this)}/>
-            </>
-          )}
+           ))}
         </ScrollView>
       </View>
     </SafeAreaView>

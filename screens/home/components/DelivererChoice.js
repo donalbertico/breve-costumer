@@ -7,7 +7,6 @@ import 'firebase/firestore'
 export default function DelivererChoice(props) {
   const db = firebase.firestore();
 
-
   const [deliverers, setDeliverers] = React.useState([])
   const [isDeliverers, setIsDeliverers] = React.useState(false)
 
@@ -24,6 +23,7 @@ export default function DelivererChoice(props) {
             })
           });
           if(deliverersArray.length > 0){
+            console.log('cuantas cuentas cuentas?');
             setDeliverers(deliverersArray);
             setIsDeliverers(true)
           }

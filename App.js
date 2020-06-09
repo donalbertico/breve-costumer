@@ -11,7 +11,7 @@ import useCachedResources from './hooks/useCachedResources'
 import useUserStorage from './hooks/useUserStorage'
 import LoadingScreen from './screens/LoadingScreen.js'
 import HomeScreen from './screens/home/HomeScreen.js'
-import NewOrderScreen from './screens/home/NewOrderScreen.js'
+import NewOrderScreen from './screens/order/NewOrderScreen.js'
 import LoginScreen from './screens/auth/LoginScreen.js'
 import RegisterScreen from './screens/auth/RegisterScreen.js'
 

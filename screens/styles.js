@@ -39,7 +39,8 @@ const styles = StyleSheet.create({
   },
   centeredBox: {
     flex:5,
-    margin: 10
+    marginTop: 10,
+    marginBottom: 5
   },
   subtleHorizontalMargin: {
     marginHorizontal : 10

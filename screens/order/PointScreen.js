@@ -20,7 +20,7 @@ export default function PointScreen(props) {
   const [order,setOrder] = useOrderStorage(props.route.params.order)
   const pointIndex = props.route.params.point ? props.route.params.point : 0;
   const [point,setPoint] = React.useState({})
-  const [points,setPoints] = usePointStorage({})
+  const [points,setPoints] = usePointStorage(props.route.params.points)
 
   const [keyboardAvoiding, setkeyboardAvoiding] = React.useState(false)
   const [address, setAddress] = React.useState()
@@ -28,7 +28,6 @@ export default function PointScreen(props) {
   const [receptor, setReceptor] = React.useState()
   const [phone, setPhone] = React.useState()
   const [detail, setDetail] = React.useState()
-  const [saved, setSaved] = React.useState(false)
 
   React.useEffect(() => {
     if(!point) return;
@@ -38,7 +37,10 @@ export default function PointScreen(props) {
   },[point])
 
   React.useEffect(()=>{
-    if(!points) return;
+    console.log('call??',points);
+    let previous = props.route.params.points
+    if(Object.keys(previous).length == 0) return;
+    setPoints(previous)
     if(points[pointIndex]) {
       setPoint(points[pointIndex])
     }else{
@@ -50,17 +52,6 @@ export default function PointScreen(props) {
     }
   },[points,pointIndex])
 
-  React.useEffect(() => {
-    if(!saved) return;
-    switch (order.type) {
-      case 0:
-        if(pointIndex == 1) return props.navigation.navigate('newOrder',{screen : 'payment'});
-        props.navigation.navigate('newOrder',{screen:'points', params : {point : (pointIndex+1), order : order}})
-      break;
-      default:
-    }
-  },[saved])
-
   nextAction = () => {
     let point = {
       address : address,
@@ -71,11 +62,14 @@ export default function PointScreen(props) {
     }
 
     let newPoints = Object.assign({},points,{[pointIndex] : point})
-    setPoints(newPoints)
     switch (order.type) {
       case 0:
-        if(pointIndex == 1) return props.navigation.navigate('newOrder',{screen : 'payment',params :{ order :order}});
-        props.navigation.navigate('newOrder',{screen:'points', params : {point : (pointIndex+1), order : order}})
+        if(pointIndex == 1) return props.navigation.navigate('newOrder',{screen : 'payment',params :{ order :order, points : newPoints}});
+        props.navigation.navigate('newOrder',{screen:'points', params : {point : (pointIndex+1), order : order,points :newPoints}})
+      break;
+      case 1:
+        if(pointIndex == 2) return props.navigation.navigate('newOrder',{screen : 'payment',params :{ order :order, points : newPoints}});
+        props.navigation.navigate('newOrder',{screen:'points', params : {point : (pointIndex+1), order : order,points :newPoints}})
       break;
       default:
     }
