@@ -21,6 +21,7 @@ export default function PointScreen(props) {
   const pointIndex = props.route.params.point ? props.route.params.point : 0;
   const [point,setPoint] = React.useState({})
   const [points,setPoints] = usePointStorage(props.route.params.points)
+  const [lineOrder,setLineOrder] = React.useState(false)
 
   const [keyboardAvoiding, setkeyboardAvoiding] = React.useState(false)
   const [address, setAddress] = React.useState()
@@ -30,14 +31,22 @@ export default function PointScreen(props) {
   const [detail, setDetail] = React.useState()
 
   React.useEffect(() => {
+    if(props.route.params.order.type == 2){
+      if(pointIndex >= 3) return setLineOrder(true);
+      setLineOrder(false)
+    }
+  },[lineOrder,pointIndex])
+
+  React.useEffect(() => {
     if(!point) return;
     setAddress(point.address)
     setReference(point.reference)
     setReceptor(point.receptor)
+    setPhone(point.phone)
+    setDetail(point.detail)
   },[point])
 
   React.useEffect(()=>{
-    console.log('call??',points);
     let previous = props.route.params.points
     if(Object.keys(previous).length == 0) return;
     setPoints(previous)
@@ -52,27 +61,37 @@ export default function PointScreen(props) {
     }
   },[points,pointIndex])
 
-  nextAction = () => {
-    let point = {
-      address : address,
-      reference : reference ? reference : '',
-      receptor : receptor ? receptor : '',
-      phone : phone ? phone : '',
-      detail : detail ? detail : ''
-    }
+  nextAction = (pay)=> e => {
+    let point = {address : address};
+
+    if(reference != '') point['reference'] = reference;
+    if(receptor != '') point['receptor'] = receptor;
+    if(phone != '') point['phone'] = phone;
+    if(detail != '') point['detail'] = detail;
 
     let newPoints = Object.assign({},points,{[pointIndex] : point})
     switch (order.type) {
       case 0:
-        if(pointIndex == 1) return props.navigation.navigate('newOrder',{screen : 'payment',params :{ order :order, points : newPoints}});
-        props.navigation.navigate('newOrder',{screen:'points', params : {point : (pointIndex+1), order : order,points :newPoints}})
+        if(pointIndex == 1) return navigateTo('payment', pointIndex,newPoints);
+        navigateTo('points', pointIndex+1,newPoints)
       break;
       case 1:
-        if(pointIndex == 2) return props.navigation.navigate('newOrder',{screen : 'payment',params :{ order :order, points : newPoints}});
-        props.navigation.navigate('newOrder',{screen:'points', params : {point : (pointIndex+1), order : order,points :newPoints}})
+        if(pointIndex == 2) return navigateTo('payment', pointIndex,newPoints);
+        navigateTo('points', pointIndex+1,newPoints)
       break;
       default:
+        if(pay) return navigateTo('payment', pointIndex,newPoints);
+        navigateTo('points', pointIndex+1,newPoints)
     }
+  }
+
+  navigateTo = (screen,index,newPoints) =>{
+    props.navigation.navigate('newOrder',{screen:screen, params : {point : index, order : order,points : newPoints}})
+  }
+
+  goBack = () => {
+    if(pointIndex == 0) return props.navigation.navigate('newOrder',{screen : 'orderType', params : order.deliverer,order :order, points : {}});
+    navigateTo('points',(pointIndex-1),points)
   }
 
   disableKeyboardAvoiding = () => {
@@ -88,7 +107,7 @@ export default function PointScreen(props) {
       <KeyboardAvoidingView enabled={keyboardAvoiding} behavior="position" style={styles.keyAvoContainer}>
         <View style={styles.screenHeader}>
           <View style={{flex:1}}>
-            <Icon name="back" type="antdesign" size={28} color={theme.colors.primary}/>
+            <Icon name="back" type="antdesign" size={28} color={theme.colors.primary} onPress={goBack}/>
           </View>
           <View style={{flex : 1}}></View>
           <View style={{flex : 4}}>
@@ -122,9 +141,26 @@ export default function PointScreen(props) {
                 </View>
               </View>
               <View style={styles.horizontalFlex,styles.centerJustified,{flex:1}}>
-                <Button
-                  icon={{ name: "arrowright", type: "antdesign",color:theme.colors.secondary}} iconRight
-                  title="Siguiente" type="clear" onPress={nextAction} />
+
+                {lineOrder? (<>
+                  <View style={{flex:3}}>
+                    <Button
+                      icon={{ name: "plus", type: "antdesign",color:theme.colors.secondary}}
+                      title="Otro punto" type="clear" onPress={nextAction()} />
+                  </View>
+                  <View style={{flex:2}}></View>
+                  <View style={{flex:3}}>
+                    <Button
+                      icon={{ name: "arrowright", type: "antdesign",color:theme.colors.secondary}} iconRight
+                      title="Finalizar" type="clear" onPress={nextAction(true)} />
+                  </View>
+                  </>) : (
+                    <View style={{flex:3}}>
+                      <Button
+                        icon={{ name: "arrowright", type: "antdesign",color:theme.colors.secondary}} iconRight
+                        title="Siguiente" type="clear" onPress={nextAction()} />
+                    </View>
+                  )}
               </View>
             </ScrollView>
           </View>

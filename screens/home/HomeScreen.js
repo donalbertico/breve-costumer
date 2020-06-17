@@ -11,6 +11,7 @@ import useOrderStorage from "../../hooks/useOrderStorage"
 import usePointStorage from "../../hooks/usePointStorage"
 import DelivererChoice from "./components/DelivererChoice"
 import OrderSumup from "./components/OrderSumup"
+import OrderInfo from "./components/OrderInfo"
 
 export default function HomeScreen(props) {
   const db = firebase.firestore()
@@ -48,21 +49,27 @@ export default function HomeScreen(props) {
   completeOrder = () => {
     switch (order.type) {
       case 0:
-        if(pointsIndex == 1) return props.navigation.navigate('newOrder',{screen : 'payment',params : {order : order, points : points}});
-        props.navigation.navigate('newOrder',{screen : 'points',params : { order : order, point : pointsIndex+1, points : points}});
+        if(pointsIndex == 1) return navigateTo('payment', pointsIndex,points);
+        navigateTo('points', pointsIndex+1,points)
       break;
       case 1:
-        if(pointsIndex == 2) return props.navigation.navigate('newOrder',{screen : 'payment',params : {order : order, points : points}});
-        props.navigation.navigate('newOrder',{screen : 'points',params : { order : order, point : pointsIndex+1, points : points}});
+        if(pointsIndex == 2) return navigateTo('payment', pointsIndex,points);
+        navigateTo('points', pointsIndex+1,points)
       break;
       default:
+        navigateTo('points', pointsIndex,points)
     }
+  }
+
+  navigateTo = (screen,index,newPoints) =>{
+    props.navigation.navigate('newOrder',{screen:screen, params : {point : index, order : order,points : newPoints}})
   }
 
   OrderInprocess = () => {
     return (
       <View>
-        <Text h3> Tienes una order creando wey {order.deliverer.name}</Text>
+        <Text>Aun no has terminado tu orden</Text>
+        <OrderInfo order={order}></OrderInfo>
         <Button
             icon={{ name: "arrowright", type: "antdesign",color:theme.colors.secondary}} iconRight
             title="Completar" type="clear" onPress={completeOrder} />
@@ -92,14 +99,39 @@ export default function HomeScreen(props) {
     }
   }
 
+  TopButtonSwitch = ({status}) => {
+    switch (status) {
+      case 'oc':
+        return (
+          <View style={{flex : 5}}>
+            <Button
+              icon={{ name: "arrowright", type: "antdesign",color:theme.colors.secondary}}
+              title="Completar Orden" type="clear" onPress={completeOrder} />
+          </View>
+        )
+        break;
+      case 'cr':
+        return (
+          <View style={{flex : 4}}>
+            <Button
+              icon={{ name: "phone", type: "antdesign",color:theme.colors.secondary}}
+              title={order.deliverer.name} type="clear"  />
+          </View>
+        )
+      default:
+        return (
+          <View style={{flex : 2}}>
+            <Button
+                    icon={{ name: "plus", type: "antdesign",color:theme.colors.secondary}}
+                    title="Orden" type="clear" onPress={()=>props.navigation.navigate('newOrder')} />
+          </View>)
+    }
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.screenHeader}>
-        <View style={{flex : 2}}>
-          <Button
-            icon={{ name: "plus", type: "antdesign",color:theme.colors.secondary}}
-            title="Orden" type="clear" onPress={()=>props.navigation.navigate('newOrder')} />
-        </View>
+        <TopButtonSwitch status={order.status}/>
         <View style={{flex:4}}></View>
         <View style={{flex:1}}>
             <Icon name="user-circle" type="font-awesome" size={28} color={theme.colors.primary}/>

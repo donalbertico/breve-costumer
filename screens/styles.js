@@ -76,6 +76,10 @@ const styles = StyleSheet.create({
   },
   marginedText :{
     margin : 5
+  },
+  pointElement :{
+    margin : 3,
+    flexDirection:'row'
   }
 });
 
