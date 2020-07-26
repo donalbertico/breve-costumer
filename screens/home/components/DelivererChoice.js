@@ -19,7 +19,7 @@ export default function DelivererChoice(props) {
             deliverersArray.push({
               id : doc.id,
               name : data.name,
-              pic : 'https://scontent-lht6-1.xx.fbcdn.net/v/t1.0-9/46495856_2001423299948896_8825750965387788288_n.png?_nc_cat=100&_nc_sid=09cbfe&_nc_ohc=-DmOaF7S1ZYAX9g9_ME&_nc_ht=scontent-lht6-1.xx&oh=69788685da86f9d8063374e5daddc6f3&oe=5EEE7A68'
+              pic : data.pic ? data.pic : 'https://scontent-lht6-1.xx.fbcdn.net/v/t1.0-9/46495856_2001423299948896_8825750965387788288_n.png?_nc_cat=100&_nc_sid=09cbfe&_nc_ohc=-DmOaF7S1ZYAX9g9_ME&_nc_ht=scontent-lht6-1.xx&oh=69788685da86f9d8063374e5daddc6f3&oe=5EEE7A68'
             })
           });
           if(deliverersArray.length > 0){

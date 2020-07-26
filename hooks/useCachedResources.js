@@ -49,7 +49,6 @@ export default function useCachedResources() {
             return false;
         }
     }
-    removeItemValue()
     async function loadResourcesAndDataAsync() {
       try {
         SplashScreen.preventAutoHideAsync();

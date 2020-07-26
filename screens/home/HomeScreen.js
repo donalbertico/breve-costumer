@@ -37,6 +37,7 @@ export default function HomeScreen(props) {
     if(updatedOrder){
       setOnProcess(true)
       if(order.status != updatedOrder.status){
+        console.log('setting order',updatedOrder);
         setOrder(updatedOrder)
       }
     }
@@ -69,7 +70,7 @@ export default function HomeScreen(props) {
     return (
       <View>
         <Text>Aun no has terminado tu orden</Text>
-        <OrderInfo order={order}></OrderInfo>
+        <OrderInfo order={order} points={points}></OrderInfo>
         <Button
             icon={{ name: "arrowright", type: "antdesign",color:theme.colors.secondary}} iconRight
             title="Completar" type="clear" onPress={completeOrder} />
@@ -128,13 +129,20 @@ export default function HomeScreen(props) {
     }
   }
 
+  logout = () => {
+      firebase.auth().signOut();
+      setTimeout(() => {
+         props.navigation.navigate('login')
+      }, 1000)
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.screenHeader}>
         <TopButtonSwitch status={order.status}/>
         <View style={{flex:4}}></View>
         <View style={{flex:1}}>
-            <Icon name="user-circle" type="font-awesome" size={28} color={theme.colors.primary}/>
+            <Icon name="user-circle" type="font-awesome" size={28} color={theme.colors.primary} onPress={logout}/>
         </View>
       </View>
       <Divider />
@@ -142,8 +150,7 @@ export default function HomeScreen(props) {
         <ScrollView>
           {onProcess?(
               <OrderStatuSwitch status={order.status}></OrderStatuSwitch>
-        ):( loading ? (<Text>Espede</Text>) :
-          (
+        ):( loading ? (<Text>Espede</Text>) :(
               <DelivererChoice onDelivererSelected={this._delivererSelected.bind(this)}/>
            ))}
         </ScrollView>

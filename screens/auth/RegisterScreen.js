@@ -65,7 +65,8 @@ export default function RegisterScreen(props) {
     setMsg('')
     const expression = ['required',{regex: "^(?=.*[A-Z])(?=.*[0-9])"}, {min : 8}];
     const valid = validator.check(value,expression);
-    setPass(value)
+    setPass(value);
+    checkPasswordsMatch(repeat);
     validator.message('password',value,expression);
     valPassMsg(valid ? '' : 'La contraseña debe tener almenso 8 caracteres, 1 numero y una letra mayuscula');
   }
@@ -113,7 +114,7 @@ export default function RegisterScreen(props) {
 
   return (
      <SafeAreaView style={styles.container}>
-       <KeyboardAvoidingView enabled={keyboardAvoiding} style={styles.keyAvoContainer} behavior="position">
+       <KeyboardAvoidingView enabled={keyboardAvoiding} style={styles.keyAvoContainer} behavior={Platform.OS=='ios' ? 'position' : 'padding'}>
          <ScrollView contentContainerStyle={styles.KeAvContScrollView}>
           <View style={styles.scrollTitle}>
            <Text h4>Bienvenido a Breve Breve</Text>
@@ -122,7 +123,6 @@ export default function RegisterScreen(props) {
            <Text style={styles.errorMessage}>{message}</Text>
           </View>
           <View style={styles.centeredBox}>
-
              <Input placeholder='Nombre completo' value={name} onChangeText={_nameInputChanged} errorMessage={nameVal} onFocus={disableKeyboardAvoiding}/>
              <Input placeholder='Email' value={email} onChangeText={email => setEmail(email)} errorMessage={emailVal} onBlur={checkEmailInput} onFocus={disableKeyboardAvoiding}/>
              <Input placeholder='Telefono' keyboardType='numeric' value={phone} onChangeText={_phoneInputChanged} errorMessage={phoneVal} onFocus={enableKeyboardAvoiding}/>
@@ -135,9 +135,8 @@ export default function RegisterScreen(props) {
              <View style={styles.horizontalFlex}>
                <View style= {{flex : 1}}></View>
                <Text h5> ya tengo una cuenta </Text>
-               <TouchableOpacity  onPress = {() => props.navigation.navigate('login')}><Text style={{color : theme.colors.primary, marginRight : 10}}>registrate aqui</Text></TouchableOpacity>
+               <TouchableOpacity  onPress = {() => props.navigation.navigate('login')}><Text style={{color : theme.colors.primary, marginRight : 10}}>ingresa aqui</Text></TouchableOpacity>
              </View>
-
            </View>
           </ScrollView>
          </KeyboardAvoidingView>

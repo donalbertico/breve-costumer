@@ -13,6 +13,7 @@ import DelivererChoice from "../home/components/DelivererChoice"
 
 import PointScreen from "./PointScreen.js"
 import PaymentScreen from "./PaymentScreen.js"
+import SumupScreen from "./SumupScreen.js"
 
 const Tab = createBottomTabNavigator();
 
@@ -35,12 +36,20 @@ function OrderTypeScreen(props){
   const orderTypeOpts = ['Express', 'Punto Extra', 'Linea']
   const [wareType,setWareType] = React.useState('dc')
   const [user] = useUserStorage({})
+  const [order] = useOrderStorage({})
 
   const orderDef = {
       0 :'Express es a toda madre como llevar una carta de punto A hacia punto B',
       1 :'Express es a toda madre mas un punto, como por ejemplo pasar recoginedo el dinero para el pansito',
       2 :'Express es a toda madre mas un punto y mas los que desee como por ejemplo coger los almuercitos e ir a dejar a 3 casas'
   }
+
+  React.useEffect(() => {
+    if(Object.keys(order).length != 0){
+      setOrderType(order.type)
+      setWareType(order.wareType)
+    }
+  },[order])
 
   createOrder = () => {
     let newOrder = {
@@ -50,7 +59,6 @@ function OrderTypeScreen(props){
       deliverer : props.route.params,
       status : 'oc'
     }
-    console.log(newOrder);
     props.navigation.navigate('newOrder',{screen:'points', params : {order : newOrder, points : {}}})
   }
 
@@ -87,7 +95,7 @@ function OrderTypeScreen(props){
           <Text style={styles.marginedText}>{'Tipo de encomienda:'}</Text>
           <Picker
             selectedValue={wareType}
-            style={{height : Platform.OS=='ios' ? 20 : 0, marginTop : Platform.OS=='ios' ? -50 : 0}}
+            style={{ marginTop : Platform.OS=='ios' ? -50 : 0}}
             itemStyle={{fontSize : 18}}
             onValueChange={(val) => setWareType(val)}>
             <Picker.Item label="documentos" value="dc"/>
@@ -113,6 +121,7 @@ export default function NewOrderScreen(props) {
       <Tab.Screen name='orderType' component={OrderTypeScreen} options={screenOpt}/>
       <Tab.Screen name='points' component={PointScreen} options={screenOpt}/>
       <Tab.Screen name='payment' component={PaymentScreen} options={screenOpt}/>
+      <Tab.Screen name='sumup' component={SumupScreen} options={screenOpt}/>
     </Tab.Navigator>
   )
 }

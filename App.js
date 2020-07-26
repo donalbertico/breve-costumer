@@ -24,14 +24,11 @@ const Stack = createStackNavigator()
 export default function App(props) {
   const [isLoadingComplete,auth,setAuth] = useCachedResources();
   const [user, setUser] = useUserStorage({});
-  const navigationRef = React.createRef();
 
-
-  _userChanged = (authUser) =>{
+  this._userChanged = (authUser) =>{
     setUser(authUser)
     setAuth(true)
   }
-
 
   if(!isLoadingComplete){
     return null;
@@ -39,11 +36,12 @@ export default function App(props) {
     return (
       <ThemeProvider theme={theme}>
         <NavigationContainer>
-          <Stack.Navigator initialRouteName="login" headerMode="None">
+          <Stack.Navigator initialRouteName='login' headerMode="None">
             {auth? (
               <>
                 <Stack.Screen name="home" component={HomeScreen}/>
                 <Stack.Screen name="newOrder" component={NewOrderScreen}/>
+                <Stack.Screen  name="loading" component={LoadingScreen}/>
               </>
             ) : (
               <>
@@ -51,9 +49,9 @@ export default function App(props) {
                 <Stack.Screen name="register" >
                   {props => <RegisterScreen {...props} onUserChanged={this._userChanged.bind(this)}/>}
                 </Stack.Screen>
+                <Stack.Screen  name="loading" component={LoadingScreen}/>
               </>
             )}
-            <Stack.Screen  name="loading" component={LoadingScreen}/>
           </Stack.Navigator>
         </NavigationContainer>
       </ThemeProvider>

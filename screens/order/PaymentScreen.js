@@ -18,8 +18,10 @@ export default function PaymentScreen(props){
   const [orderTypeDic,currentPointDic] = parametersDictionary()
 
   const [order,setOrder] = useOrderStorage(props.route.params.order)
-  const [points] = usePointStorage(props.route.params.points)
+  const points = props.route.params.points;
+  const [user,setUser] = useUserStorage({})
   const [avaliblePoints,setAvaliblePoints] = React.useState([])
+  const [showSumup, setShowSumup] = React.useState(false);
 
   const [payingAt,setPayingAt] = React.useState(order.payingAt ? order.payingAt : '0');
   const [detail,setDetail] = React.useState(order.detail)
@@ -34,40 +36,27 @@ export default function PaymentScreen(props){
       elements.push(<Picker.Item key={index} label={`Punto ${currentPointDic[index]}`} value={`${index}`}/>)
     });
     setAvaliblePoints(elements)
-    console.log(order,lastPointIndex,points);
   },[points])
 
+  React.useEffect(() => {
+    let newOrder = Object.assign({},props.route.params.order)
+    if(detail) newOrder.detail = detail;
+    if(payingAt) newOrder.payingAt = payingAt;
+    setOrder(newOrder)
+  },[detail,payingAt])
 
-  createOrder = ()=>{
-    let newOrder = Object.assign({},order);
-    newOrder.detail = detail;
-    newOrder.payingAt = payingAt;
-    newOrder.status = 'cr';
-    newOrder.deliverer = order.deliverer.id
 
-    props.navigation.navigate('loading')
-    let orderRef = db.collection('orders')
-    orderRef.add(newOrder)
-      .then((doc) => {
-        var batch = db.batch();
-        let pointsIndexes = Object.keys(points);
-        pointsIndexes.forEach((point) => {
-          const ref = orderRef.doc(doc.id).collection('points').doc();
-          batch.set(ref,points[point]);
-        });
-        batch.commit()
-          .then(props.navigation.navigate('home',{order : Object.assign({},order,{detail : detail, payingAt:payingAt,status : 'cr'})}))
-          .catch((e) => {console.log(e,'Error saving batch')})
-      })
-      .catch((e) => console.log(e,'ERROR saving order'))
+  openSumUp = () => {
+    props.navigation.navigate('newOrder',{screen: 'sumup', params : { order : order, points : points} });
   }
+
 
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView behavior="position" style={styles.keyAvoContainer}>
         <View style={styles.screenHeader}>
           <View style={{flex:1}}>
-            <Icon name="back" type="antdesign" size={28} color={theme.colors.primary} onPress={() => { props.navigation.navigate('newOrder',{screen:'points',params : {point : lastPointIndex, order : order, points : {}}})}}/>
+            <Icon name="back" type="antdesign" size={28} color={theme.colors.primary} onPress={() => { props.navigation.navigate('newOrder',{screen:'points',params : {point : lastPointIndex, order : order, points :points, refresh : true }})}}/>
           </View>
           <View style={{flex : 1}}></View>
           <View style={{flex : 4}}>
@@ -87,7 +76,7 @@ export default function PaymentScreen(props){
                 selectedValue={payingAt}
                 style={{ marginTop : Platform.OS =='ios' ?-40 : 0}}
                 itemStyle={{fontSize : 18}}
-                onValueChange={(val) => setPayingAt(val)}>
+                onValueChange={(val) => {setPayingAt(val)}}>
                 {avaliblePoints}
               </Picker>
             </View>
@@ -98,7 +87,7 @@ export default function PaymentScreen(props){
             <View style={styles.horizontalFlex,styles.centerJustified,{flex:1}}>
               <Button
                 icon={{ name: "arrowright", type: "antdesign",color:theme.colors.secondary}} iconRight
-                title="Siguiente" type="clear" onPress={createOrder} />
+                title="Siguiente" type="clear" onPress={openSumUp} />
             </View>
           </ScrollView>
          </View>

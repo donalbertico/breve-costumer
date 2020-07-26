@@ -79,6 +79,7 @@ const styles = StyleSheet.create({
   },
   pointElement :{
     margin : 3,
+    marginTop : 8,
     flexDirection:'row'
   }
 });

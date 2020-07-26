@@ -14,9 +14,16 @@ export default function LoginScreen(props) {
   const [message,setMsg] = React.useState('')
 
   handleLogin = () => {
+    props.navigation.navigate('loading')
     firebase
         .auth()
         .signInWithEmailAndPassword(email,password)
+        .then(
+          setTimeout(() => {
+             console.log('This will run after 1 second!')
+             props.navigation.navigate('home')
+          }, 1000)
+        )
         .catch((err) => {
           setMsg(err.message)
           setErr(err.code)
@@ -32,16 +39,21 @@ export default function LoginScreen(props) {
         <Text style={styles.errorMessage}>{message}</Text>
       </View>
       <View style={styles.centeredBox}>
-        <Input placeholder='Email' value={email} onChangeText={email => setEmail(email)}/>
-        <Input  placeholder='Password' value={password} onChangeText={password => setPass(password)} secureTextEntry={true}/>
-        <Button
-          icon={{ name: "arrowright", type: "antdesign",color:theme.colors.secondary}} iconRight
-          title="Ingresar" type="clear" onPress={handleLogin} />
-        <View style={{marginTop : 30}}></View>
-        <View style={styles.horizontalFlex}>
-          <View style= {{flex : 1}}></View>
-          <Text > si no tienes una cuenta </Text>
-          <TouchableOpacity  onPress = {() => props.navigation.navigate('register')}><Text style={{color : theme.colors.primary, marginRight : 10}}>registrate aqui</Text></TouchableOpacity>
+        <View >
+          <Input placeholder='Email' value={email} onChangeText={email => setEmail(email)}/>
+          <Input  placeholder='Password' value={password} onChangeText={password => setPass(password)} secureTextEntry={true}/>
+          <Button
+            icon={{ name: "arrowright", type: "antdesign",color:theme.colors.secondary}} iconRight
+            title="Ingresar" type="clear" onPress={handleLogin} />
+        </View>
+        <View style={{flex:1}}>
+          <View style={{flex:2}}></View>
+          <View style={{flex:3},styles.horizontalFlex}>
+            <View style= {{flex : 1}}></View>
+            <Text > si no tienes una cuenta </Text>
+            <TouchableOpacity  onPress = {() => props.navigation.navigate('register')}><Text style={{color : theme.colors.primary, marginRight : 10}}>registrate aqui</Text></TouchableOpacity>
+          </View>
+          <View style={{flex:1}}></View>
         </View>
       </View>
     </View>
