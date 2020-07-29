@@ -7,7 +7,7 @@ import 'firebase/firestore'
 import { AsyncStorage } from 'react-native';
 
 import useUserStorage from './useUserStorage'
-import useOrderStorage from './useOrderStorage'
+import useProcessOrdersStorage from './useProcessOrdersStorage'
 import ApiKeys from '../constants/ApiKeys.js'
 
 export default function useCachedResources() {
@@ -30,13 +30,13 @@ export default function useCachedResources() {
   }
 
   React.useEffect(()=>{
-    if(authUid && !user.uid){
+    if(!authUid) return;
+    if(!user.uid){
       getUser()
-    }else if(authUid && (user.uid != authUid)){
+    }else if(user.uid != authUid){
       getUser()
     }
-
-  },[user,authUid])
+  },[authUid])
   // Load any resources or data that we need prior to rendering the app
   React.useEffect(() => {
     async function removeItemValue() {
@@ -49,6 +49,7 @@ export default function useCachedResources() {
             return false;
         }
     }
+    removeItemValue()
     async function loadResourcesAndDataAsync() {
       try {
         SplashScreen.preventAutoHideAsync();

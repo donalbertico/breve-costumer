@@ -8,6 +8,7 @@ import {styles,theme} from "../styles"
 
 import useUserStorage from "../../hooks/useUserStorage"
 import useOrderStorage from "../../hooks/useOrderStorage"
+import useProcessOrdersStorage from "../../hooks/useProcessOrdersStorage"
 import usePointStorage from "../../hooks/usePointStorage"
 import DelivererChoice from "./components/DelivererChoice"
 import OrderSumup from "./components/OrderSumup"
@@ -20,28 +21,97 @@ export default function HomeScreen(props) {
   const updatedOrder = props.route.params ? (props.route.params.order? props.route.params.order : false ):false;
   const [order,setOrder,loadingOrder] = useOrderStorage({})
   const [loading,setLoading] = React.useState(true)
+  const [gettingOrders,setGettingOrders] = React.useState(true)
   const [points,setPoints,loadingPoints] = usePointStorage({})
   const [pointsIndex,setPointsIndex] = React.useState(0)
+  const [processOrders, setProcessOrders] = React.useState({})
+  const [processOrdersPoints, setProcessOrdersPoints] = React.useState({})
+  const [subscribed,setSubscribed] = React.useState(false)
+  const [user,setUser] = useUserStorage({})
+  const [ordersElements, setOrdersElements] = React.useState([]);
+  const [ordersDeliverers, setOrdersDeliverers] = React.useState({});
 
   React.useEffect(() => {
-    if((!loadingOrder) && (!loadingPoints)){
+    if((!loadingOrder) && (!loadingPoints) && (!gettingOrders)){
       setLoading(false)
     }else return;
     if(Object.keys(order).length != 0){
       setPointsIndex((Object.keys(points).length)-1)
       setOnProcess(true)
     }
-  }, [order,loadingOrder,loadingPoints])
+  }, [order,loadingOrder,loadingPoints,gettingOrders])
 
   React.useEffect(() => {
     if(updatedOrder){
       setOnProcess(true)
       if(order.status != updatedOrder.status){
-        console.log('setting order',updatedOrder);
         setOrder(updatedOrder)
       }
+      setSubscribed(false);
     }
-  },[updatedOrder])
+    if(!subscribed && user.uid){
+      setOnProcess(true);
+
+      let ordersRef = db.collection('orders').where('user','==',user.uid).where('status','in',['cr','tk','as','pr']);
+      ordersRef.onSnapshot((snapshot) => {
+        let orders = {};
+        let delivererIds = [];
+        snapshot.forEach((doc) => {
+          let data = doc.data();
+          let points = [];
+          data.id = doc.id;
+          doc.ref.collection('points').get()
+              .then((pointsSnap) => {
+                pointsSnap.forEach((pt) => {points.push(pt.data())});
+                data.points = points;
+                orders[data.reference] = data;
+                setProcessOrders(orders)
+              })
+
+          delivererIds.push(data.deliverer);
+        });
+        delivererIds = [... new Set(delivererIds)];
+        let deliverers = {}
+        db.collection('deliverers').where(firebase.firestore.FieldPath.documentId(),'in',delivererIds).get()
+          .then((deliverersSnap) => {
+            deliverersSnap.forEach((deliverer) => {
+              deliverers[deliverer.id] = deliverer.data();
+            });
+            setOrdersDeliverers(deliverers);
+          })
+        setSubscribed(true);
+      });
+
+    }
+  },[updatedOrder,user])
+
+  React.useEffect(() => {
+    if(!subscribed) return;
+    let ordersKeys = Object.keys(processOrders);
+    let deliverersKeys = Object.keys(ordersDeliverers);
+    console.log(ordersKeys.length, deliverersKeys.length);
+    if(ordersKeys.length > 0 &&  deliverersKeys.length >0 ){
+        setGettingOrders(true);
+        let elements = [];
+        ordersKeys.forEach((order) => {
+          elements.push(
+            <OrderSumup key={order} order={processOrders[order]} deliverer={ordersDeliverers[processOrders[order].deliverer]}></OrderSumup>
+          );
+        });
+        setOrdersElements(elements);
+        setGettingOrders(false)
+    }
+    if(deliverersKeys.length == 0 && ordersKeys.length == 0){
+      console.log('cuandio?', subscribed);
+      setGettingOrders(false);
+      setOnProcess(false);
+    }
+  },[processOrders, ordersDeliverers])
+
+
+  selectOrder = () => {
+
+  }
 
   _delivererSelected = (deliverer) => {
     props.navigation.navigate('newOrder',{screen : 'orderType', params : deliverer, points : {}})
@@ -84,19 +154,16 @@ export default function HomeScreen(props) {
     )
   }
 
-  OrderStatuSwitch = ({status}) => {
-    switch (status) {
-      case 'oc':
-        return (<OrderInprocess></OrderInprocess>)
-        break;
-      case 'cr':
-        return (
-          <View>
-            <Text>la order esta siendo revisada por la mensajeria, te notificaremos tan pronto sea aceptada</Text>
-            <OrderSumup order={order}></OrderSumup>
-          </View>
-        )
-      default:
+  OrderStatuSwitch = () => {
+    if(ordersElements.length > 0){
+      return (
+        <View>
+            <Text>las siguientes ordenes estan en proceso con una mensajeria</Text>
+            {ordersElements}
+        </View>
+      )
+    }else{
+      return (<Text>Espede de process</Text>)
     }
   }
 
@@ -148,8 +215,9 @@ export default function HomeScreen(props) {
       <Divider />
       <View style={styles.screenBody}>
         <ScrollView>
-          {onProcess?(
-              <OrderStatuSwitch status={order.status}></OrderStatuSwitch>
+          {onProcess?( <>
+              {order.status == 'oc' ? (<OrderInprocess></OrderInprocess>): (<></>)}
+              <OrderStatuSwitch></OrderStatuSwitch></>
         ):( loading ? (<Text>Espede</Text>) :(
               <DelivererChoice onDelivererSelected={this._delivererSelected.bind(this)}/>
            ))}
