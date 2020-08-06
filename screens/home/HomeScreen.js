@@ -1,6 +1,7 @@
 import * as React from 'react'
-import {View, SafeAreaView, ScrollView} from 'react-native'
+import {View, SafeAreaView, ScrollView,TouchableOpacity} from 'react-native'
 import { Text , Button, Icon, Header,Divider} from 'react-native-elements'
+import { createDrawerNavigator } from '@react-navigation/drawer';
 import * as firebase from 'firebase'
 import 'firebase/firestore'
 
@@ -13,8 +14,11 @@ import usePointStorage from "../../hooks/usePointStorage"
 import DelivererChoice from "./components/DelivererChoice"
 import OrderSumup from "./components/OrderSumup"
 import OrderInfo from "./components/OrderInfo"
+import TrackScreen from "./TrackScreen"
 
-export default function HomeScreen(props) {
+const Drawer = createDrawerNavigator();
+
+function HomeScreen(props) {
   const db = firebase.firestore()
 
   const [onProcess,setOnProcess] = React.useState(false)
@@ -30,6 +34,7 @@ export default function HomeScreen(props) {
   const [user,setUser] = useUserStorage({})
   const [ordersElements, setOrdersElements] = React.useState([]);
   const [ordersDeliverers, setOrdersDeliverers] = React.useState({});
+  const [trackingOrder,setTracking] = React.useState(props.route.params ? (props.route.params.tracking? props.route.params.tracking : {} ):{});
 
   React.useEffect(() => {
     if((!loadingOrder) && (!loadingPoints) && (!gettingOrders)){
@@ -56,6 +61,7 @@ export default function HomeScreen(props) {
       ordersRef.onSnapshot((snapshot) => {
         let orders = {};
         let delivererIds = [];
+        console.log('orders');
         snapshot.forEach((doc) => {
           let data = doc.data();
           let points = [];
@@ -78,6 +84,7 @@ export default function HomeScreen(props) {
               deliverers[deliverer.id] = deliverer.data();
             });
             setOrdersDeliverers(deliverers);
+
           })
         setSubscribed(true);
       });
@@ -89,28 +96,33 @@ export default function HomeScreen(props) {
     if(!subscribed) return;
     let ordersKeys = Object.keys(processOrders);
     let deliverersKeys = Object.keys(ordersDeliverers);
-    console.log(ordersKeys.length, deliverersKeys.length);
     if(ordersKeys.length > 0 &&  deliverersKeys.length >0 ){
         setGettingOrders(true);
         let elements = [];
         ordersKeys.forEach((order) => {
           elements.push(
-            <OrderSumup key={order} order={processOrders[order]} deliverer={ordersDeliverers[processOrders[order].deliverer]}></OrderSumup>
+            <TouchableOpacity key={order} onPress={selectOrder(order)}>
+              <OrderSumup order={processOrders[order]} deliverer={ordersDeliverers[processOrders[order].deliverer]} ></OrderSumup>
+            </TouchableOpacity>
           );
         });
         setOrdersElements(elements);
         setGettingOrders(false)
+        if(trackingOrder.reference && ordersDeliverers[trackingOrder.deliverer]){
+          props.navigation.navigate('home',{screen: 'track',order: processOrders[trackingOrder.reference], deliverer : ordersDeliverers[trackingOrder.reference] })
+        }
     }
     if(deliverersKeys.length == 0 && ordersKeys.length == 0){
-      console.log('cuandio?', subscribed);
       setGettingOrders(false);
       setOnProcess(false);
     }
   },[processOrders, ordersDeliverers])
 
 
-  selectOrder = () => {
-
+  selectOrder = (ref) => e => {
+    setTracking(processOrders[ref]);
+    console.log(ref,trackingOrder);
+    props.navigation.navigate('home',{screen: 'track',params : {order: processOrders[ref], deliverer : ordersDeliverers[processOrders[ref].deliverer]}})
   }
 
   _delivererSelected = (deliverer) => {
@@ -136,6 +148,13 @@ export default function HomeScreen(props) {
     props.navigation.navigate('newOrder',{screen:screen, params : {point : index, order : order,points : newPoints}})
   }
 
+  logout = () => {
+      firebase.auth().signOut();
+      setTimeout(() => {
+         props.navigation.navigate('login')
+      }, 1000)
+  }
+
   OrderInprocess = () => {
     return (
       <View>
@@ -146,12 +165,6 @@ export default function HomeScreen(props) {
             title="Completar" type="clear" onPress={completeOrder} />
       </View>
       )
-  }
-
-  OrderTracking = () => {
-    return (
-      <Text h3> Tienes una order agarrada{order.deliverer}</Text>
-    )
   }
 
   OrderStatuSwitch = () => {
@@ -196,12 +209,6 @@ export default function HomeScreen(props) {
     }
   }
 
-  logout = () => {
-      firebase.auth().signOut();
-      setTimeout(() => {
-         props.navigation.navigate('login')
-      }, 1000)
-  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -224,5 +231,14 @@ export default function HomeScreen(props) {
         </ScrollView>
       </View>
     </SafeAreaView>
+  )
+}
+
+export default function HomeDrawer(props){
+  return (
+    <Drawer.Navigator initialRouteName="main">
+      <Drawer.Screen name="main" component={HomeScreen} />
+      <Drawer.Screen name="track" component={TrackScreen} />
+    </Drawer.Navigator>
   )
 }

@@ -9,7 +9,8 @@ const theme = {
     grey0 : '#757575',
     grey1 : '#BDBDBD',
     error : '#F44336',
-    warning: '#FF9800'
+    warning: '#FF9800',
+    orange : '#FF9800'
   },
 }
 
@@ -62,7 +63,8 @@ const styles = StyleSheet.create({
     color : theme.colors.grey0
   },
   centerJustified:{
-    alignItems : 'center'
+    alignItems : 'center',
+    justifyContent : 'center'
   },
   screenHeader:{
     flex : 1,
