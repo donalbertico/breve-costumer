@@ -23,7 +23,7 @@ export default function OrderSumup(props){
         return (<View style={styles.horizontalFlex}><Text style={{margin : 2,color : theme.colors.orange}}>En revision</Text><Icon name="format-list-checks" type="material-community" color={theme.colors.orange} size={18}></Icon></View>);
       break;
       case 'tk':
-        return (<Text>Asignando rider</Text>);
+        return (<View style={styles.horizontalFlex}><Text style={{margin : 2,color : theme.colors.lightGreen}}>Asignando rider</Text><Icon name="bike" type="material-community" color={theme.colors.lightGreen} size={18}></Icon></View>);
       break;
       case 'pr':
         return (<Text>En transito</Text>);

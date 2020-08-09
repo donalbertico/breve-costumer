@@ -34,6 +34,7 @@ function HomeScreen(props) {
   const [user,setUser] = useUserStorage({})
   const [ordersElements, setOrdersElements] = React.useState([]);
   const [ordersDeliverers, setOrdersDeliverers] = React.useState({});
+  const [ordersRiders, setOrdersRiders] = React.useState({});
   const [trackingOrder,setTracking] = React.useState(props.route.params ? (props.route.params.tracking? props.route.params.tracking : {} ):{});
 
   React.useEffect(() => {
@@ -61,6 +62,7 @@ function HomeScreen(props) {
       ordersRef.onSnapshot((snapshot) => {
         let orders = {};
         let delivererIds = [];
+        let riderIds = [];
         console.log('orders');
         snapshot.forEach((doc) => {
           let data = doc.data();
@@ -73,19 +75,33 @@ function HomeScreen(props) {
                 orders[data.reference] = data;
                 setProcessOrders(orders)
               })
-
-          delivererIds.push(data.deliverer);
+          if(data.deliverer)delivererIds.push(data.deliverer);
+          if(data.status == 'pr')riderIds.push(data.rider);
         });
         delivererIds = [... new Set(delivererIds)];
-        let deliverers = {}
-        db.collection('deliverers').where(firebase.firestore.FieldPath.documentId(),'in',delivererIds).get()
-          .then((deliverersSnap) => {
-            deliverersSnap.forEach((deliverer) => {
-              deliverers[deliverer.id] = deliverer.data();
-            });
-            setOrdersDeliverers(deliverers);
 
-          })
+        if(delivererIds.length > 0){
+          let deliverers = {};
+          db.collection('deliverers').where(firebase.firestore.FieldPath.documentId(),'in',delivererIds).get()
+            .then((deliverersSnap) => {
+              deliverersSnap.forEach((deliverer) => {
+                deliverers[deliverer.id] = deliverer.data();
+              });
+              setOrdersDeliverers(deliverers);
+            })
+        }
+        if(riderIds.length > 0){
+          let riders = {};
+          db.collection('users').where(firebase.firestore.FieldPath.documentId(),'in',riderIds).get()
+            .then((ridersSnap) => {
+              console.log('RIDERS');
+              ridersSnap.forEach((rider) => {
+                riders[rider.id] = rider.data();
+                console.log(rider.data());
+              });
+              setOrdersRiders(riders);
+            })
+        }
         setSubscribed(true);
       });
 
@@ -96,20 +112,24 @@ function HomeScreen(props) {
     if(!subscribed) return;
     let ordersKeys = Object.keys(processOrders);
     let deliverersKeys = Object.keys(ordersDeliverers);
-    if(ordersKeys.length > 0 &&  deliverersKeys.length >0 ){
+    if(ordersKeys.length > 0){
         setGettingOrders(true);
         let elements = [];
         ordersKeys.forEach((order) => {
+          let orderInfo = processOrders[order];
+          let deliverer = orderInfo.deliverer ? ordersDeliverers[orderInfo.deliverer]: {};
           elements.push(
             <TouchableOpacity key={order} onPress={selectOrder(order)}>
-              <OrderSumup order={processOrders[order]} deliverer={ordersDeliverers[processOrders[order].deliverer]} ></OrderSumup>
+              <OrderSumup order={orderInfo} deliverer={deliverer}></OrderSumup>
             </TouchableOpacity>
           );
         });
         setOrdersElements(elements);
         setGettingOrders(false)
+
         if(trackingOrder.reference && ordersDeliverers[trackingOrder.deliverer]){
-          props.navigation.navigate('home',{screen: 'track',order: processOrders[trackingOrder.reference], deliverer : ordersDeliverers[trackingOrder.reference] })
+          setTracking(processOrders[trackingOrder.reference]);
+          props.navigation.navigate('home',{screen: 'track', params : {order: processOrders[trackingOrder.reference], deliverer : ordersDeliverers[trackingOrder.deliverer] }})
         }
     }
     if(deliverersKeys.length == 0 && ordersKeys.length == 0){
@@ -120,9 +140,10 @@ function HomeScreen(props) {
 
 
   selectOrder = (ref) => e => {
+    let rider = processOrders[ref].rider ? ordersRiders[processOrders[ref].rider] : {};
+
     setTracking(processOrders[ref]);
-    console.log(ref,trackingOrder);
-    props.navigation.navigate('home',{screen: 'track',params : {order: processOrders[ref], deliverer : ordersDeliverers[processOrders[ref].deliverer]}})
+    props.navigation.navigate('home',{screen: 'track',params : {order: processOrders[ref], deliverer : ordersDeliverers[processOrders[ref].deliverer], rider : rider}})
   }
 
   _delivererSelected = (deliverer) => {

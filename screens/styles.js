@@ -10,7 +10,8 @@ const theme = {
     grey1 : '#BDBDBD',
     error : '#F44336',
     warning: '#FF9800',
-    orange : '#FF9800'
+    orange : '#FF9800',
+    lightGreen : '#CDDC39'
   },
 }
 

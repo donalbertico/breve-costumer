@@ -40,8 +40,6 @@ export default function SumupScreen(props){
           let reference = Math.floor(1000 + Math.random() * 9000);
           if(userData.lastOrder){
             userData.lastOrder = new Date(userData.lastOrder.seconds*1000);
-            console.log(userData.lastOrder);
-            console.log(currentDate);
             if(userData.lastOrder.getMonth() == currentDate.getMonth() && userData.lastOrder.getDate() == currentDate.getDate()){
                 while(todayOrders.includes(reference)){
                   reference = Math.floor(1000 + Math.random() * 9000);
@@ -50,11 +48,8 @@ export default function SumupScreen(props){
               todayOrders = []
             }
           }
-
           todayOrders.push(reference)
-          console.log(todayOrders, currentDate);
           newOrder.reference = reference;
-
           userRef.update({todayOrders : todayOrders, lastOrder : currentDate}).then(
             orderRef.add(newOrder)
               .then((doc) => {
